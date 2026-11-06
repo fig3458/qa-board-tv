@@ -39,3 +39,8 @@
 ## 改地址
 
 编辑 `app/src/main/res/values/strings.xml` 里的 `board_url` 后重新打包。
+
+## 许可证
+
+[MIT](LICENSE)
+
