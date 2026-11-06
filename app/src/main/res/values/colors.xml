@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="qa_bg">#0B1220</color>
+    <color name="qa_accent">#2F6BFF</color>
+    <color name="qa_text">#FFFFFF</color>
+    <color name="qa_menu_bg">#E6121828</color>
+</resources>

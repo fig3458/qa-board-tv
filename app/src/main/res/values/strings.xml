@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">QA专用</string>
+    <string name="board_url">http://192.168.98.205/mes/#/qaNewBoard</string>
+    <string name="menu_refresh">刷新看板</string>
+    <string name="menu_reload_hard">强制重载</string>
+    <string name="loading">正在加载看板…</string>
+    <string name="load_failed">看板加载失败，按菜单键可刷新重试</string>
+</resources>
