@@ -37,6 +37,58 @@
     </LinearLayout>
 
     <LinearLayout
+        android:id="@+id/urlSetupOverlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/qa_bg"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:padding="48dp"
+        android:visibility="gone">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="24dp"
+            android:text="@string/setup_title"
+            android:textColor="@color/qa_text"
+            android:textSize="32sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="720dp"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:text="@string/setup_hint"
+            android:textColor="@color/qa_text"
+            android:textSize="20sp" />
+
+        <EditText
+            android:id="@+id/urlInput"
+            android:layout_width="720dp"
+            android:layout_height="72dp"
+            android:background="@drawable/menu_panel"
+            android:hint="https://"
+            android:imeOptions="actionDone"
+            android:inputType="textUri"
+            android:paddingHorizontal="20dp"
+            android:singleLine="true"
+            android:textColor="@color/qa_text"
+            android:textColorHint="#88FFFFFF"
+            android:textSize="22sp" />
+
+        <Button
+            android:id="@+id/btnSaveUrl"
+            android:layout_width="320dp"
+            android:layout_height="72dp"
+            android:layout_marginTop="28dp"
+            android:backgroundTint="@color/qa_accent"
+            android:focusable="true"
+            android:text="@string/setup_save"
+            android:textSize="22sp" />
+    </LinearLayout>
+
+    <LinearLayout
         android:id="@+id/remoteMenu"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -50,7 +102,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"
-            android:text="遥控器菜单"
+            android:text="@string/remote_menu_title"
             android:textColor="@color/qa_text"
             android:textSize="26sp"
             android:textStyle="bold" />
@@ -69,9 +121,19 @@
             android:id="@+id/btnHardReload"
             android:layout_width="320dp"
             android:layout_height="72dp"
+            android:layout_marginBottom="12dp"
             android:backgroundTint="@color/qa_accent"
             android:focusable="true"
             android:text="@string/menu_reload_hard"
+            android:textSize="22sp" />
+
+        <Button
+            android:id="@+id/btnSetUrl"
+            android:layout_width="320dp"
+            android:layout_height="72dp"
+            android:backgroundTint="@color/qa_accent"
+            android:focusable="true"
+            android:text="@string/menu_set_url"
             android:textSize="22sp" />
     </LinearLayout>
 </FrameLayout>

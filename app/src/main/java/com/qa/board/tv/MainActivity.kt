@@ -9,6 +9,7 @@ import android.util.Log
 import android.view.KeyEvent
 import android.view.View
 import android.view.WindowManager
+import android.view.inputmethod.EditorInfo
 import android.webkit.WebChromeClient
 import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
@@ -29,6 +30,7 @@ class MainActivity : AppCompatActivity() {
     private val mainHandler = Handler(Looper.getMainLooper())
     private var menuVisible = false
     private var pageReady = false
+    private var setupVisible = false
 
     private val hideSystemUiRunnable = Runnable { enterImmersiveMode() }
 
@@ -51,10 +53,15 @@ class MainActivity : AppCompatActivity() {
         enterImmersiveMode()
         setupWebView()
         setupRemoteMenu()
+        setupUrlPanel()
 
         binding.root.post {
             applyTvScale()
-            loadBoard(hard = false)
+            if (BoardPrefs.hasUrl(this)) {
+                loadBoard(hard = false)
+            } else {
+                showUrlSetup(prefill = "")
+            }
         }
     }
 
@@ -96,6 +103,7 @@ class MainActivity : AppCompatActivity() {
             KeyEvent.KEYCODE_INFO,
             KeyEvent.KEYCODE_TV,
             KeyEvent.KEYCODE_GUIDE -> {
+                if (setupVisible) return true
                 toggleRemoteMenu()
                 return true
             }
@@ -104,12 +112,18 @@ class MainActivity : AppCompatActivity() {
                     hideRemoteMenu()
                     return true
                 }
+                if (setupVisible && BoardPrefs.hasUrl(this)) {
+                    hideUrlSetup()
+                    return true
+                }
             }
             KeyEvent.KEYCODE_PROG_RED,
             KeyEvent.KEYCODE_MEDIA_PLAY,
             KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE -> {
-                refreshBoard(hard = false)
-                return true
+                if (!setupVisible) {
+                    refreshBoard(hard = false)
+                    return true
+                }
             }
         }
         return super.onKeyDown(keyCode, event)
@@ -183,10 +197,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    /**
-     * Scale the whole WebView so a 1920-wide page fills the TV panel.
-     * This is the reliable fix for “tiny content stuck in the top-left corner”.
-     */
     private fun applyTvScale() {
         val webView = binding.webView
         val w = webView.width.takeIf { it > 0 } ?: resources.displayMetrics.widthPixels
@@ -194,7 +204,7 @@ class MainActivity : AppCompatActivity() {
         val scalePct = (min(w.toFloat() / designWidth, h.toFloat() / designHeight) * 100f)
             .toInt()
             .coerceIn(25, 400)
-        Log.i(TAG, "TV scale=${scalePct}% view=${w}x${h} density=${resources.displayMetrics.density}")
+        Log.i(TAG, "TV scale=${scalePct}% view=${w}x${h}")
         webView.setInitialScale(scalePct)
     }
 
@@ -261,11 +271,58 @@ class MainActivity : AppCompatActivity() {
             hideRemoteMenu()
             refreshBoard(hard = true)
         }
+        binding.btnSetUrl.setOnClickListener {
+            hideRemoteMenu()
+            showUrlSetup(prefill = BoardPrefs.getUrl(this))
+        }
+    }
+
+    private fun setupUrlPanel() {
+        binding.btnSaveUrl.setOnClickListener { saveUrlFromInput() }
+        binding.urlInput.setOnEditorActionListener { _, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_DONE) {
+                saveUrlFromInput()
+                true
+            } else {
+                false
+            }
+        }
+    }
+
+    private fun saveUrlFromInput() {
+        val normalized = BoardPrefs.normalize(binding.urlInput.text?.toString().orEmpty())
+        if (normalized.isEmpty()) {
+            Toast.makeText(this, R.string.setup_empty, Toast.LENGTH_SHORT).show()
+            return
+        }
+        BoardPrefs.setUrl(this, normalized)
+        Toast.makeText(this, R.string.url_saved, Toast.LENGTH_SHORT).show()
+        hideUrlSetup()
+        loadBoard(hard = true)
+    }
+
+    private fun showUrlSetup(prefill: String) {
+        setupVisible = true
+        hideRemoteMenu()
+        binding.loadingOverlay.visibility = View.GONE
+        binding.urlInput.setText(prefill)
+        binding.urlSetupOverlay.visibility = View.VISIBLE
+        binding.urlInput.requestFocus()
+    }
+
+    private fun hideUrlSetup() {
+        setupVisible = false
+        binding.urlSetupOverlay.visibility = View.GONE
+        enterImmersiveMode()
     }
 
     private fun loadBoard(hard: Boolean) {
+        val url = BoardPrefs.getUrl(this)
+        if (url.isEmpty()) {
+            showUrlSetup(prefill = "")
+            return
+        }
         showLoading(getString(R.string.loading))
-        val url = getString(R.string.board_url)
         if (hard) {
             binding.webView.clearCache(true)
         }
@@ -274,6 +331,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun refreshBoard(hard: Boolean) {
+        if (!BoardPrefs.hasUrl(this)) {
+            showUrlSetup(prefill = "")
+            return
+        }
         if (hard || !pageReady) {
             loadBoard(hard = true)
         } else {
@@ -319,6 +380,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     companion object {
-        private const val TAG = "QABoard"
+        private const val TAG = "BoardShell"
     }
 }
